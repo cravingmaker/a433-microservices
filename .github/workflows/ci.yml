@@ -1,0 +1,40 @@
+name: CI/CD Karsajobs Frontend
+
+# Jalankan CI saat push atau pull request ke branch karsajobs-ui
+on:
+  push:
+    branches: [ karsajobs-ui, main ]
+  pull_request:
+    branches: [ karsajobs-ui, main ]
+
+jobs:
+  # Job 1: Lint Dockerfile menggunakan hadolint
+  lint-dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Lint Dockerfile — pastikan mengikuti best practice
+      - name: Lint Dockerfile dengan hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+  # Job 2: Build dan push image ke GHCR (hanya jika lint berhasil)
+  build-app-karsajobs-ui:
+    needs: [lint-dockerfile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Login ke GitHub Container Registry menggunakan GITHUB_TOKEN otomatis
+      - name: Login ke GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      # Build image dan beri tag sesuai format GHCR
+      - name: Build Docker image
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/karsajobs-ui:latest .
+
+      # Push image ke GHCR agar dapat ditarik oleh Kubernetes
+      - name: Push image ke GHCR
+        run: docker push ghcr.io/${{ github.repository_owner }}/karsajobs-ui:latest
