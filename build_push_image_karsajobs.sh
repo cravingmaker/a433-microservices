@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GITHUB_USERNAME="maverick"
+GITHUB_USERNAME="cravingmaker"
 IMAGE_NAME="karsajobs"
 IMAGE_TAG="latest"
 REGISTRY="ghcr.io"
