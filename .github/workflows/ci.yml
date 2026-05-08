@@ -7,6 +7,11 @@ on:
   pull_request:
     branches: [ karsajobs-ui, main ]
 
+# Izin eksplisit agar GITHUB_TOKEN bisa push image ke GHCR
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   # Job 1: Lint Dockerfile menggunakan hadolint
   lint-dockerfile:
