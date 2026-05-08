@@ -1,19 +1,49 @@
+# Versi spesifikasi Docker Compose yang digunakan
 version: "3.8"
 
 services:
+  # ---------------------------------------------------------------------------
+  # Service: item-app
+  # Menjalankan aplikasi Node.js yang menyajikan static asset dan
+  # menangani request HTTP dari pengguna.
+  # ---------------------------------------------------------------------------
   item-app:
+    # Gunakan image yang sudah dibangun dan diunggah ke GitHub Container Registry.
     image: ghcr.io/cravingmaker/item-app:v1
+    # Port mapping: port 80 di host diteruskan ke port 8080 di container.
+    # Pengguna mengakses aplikasi melalui http://localhost (port 80).
     ports:
       - "80:8080"
+    # Pastikan item-app hanya berjalan SETELAH item-db diluncurkan.
+    # Agar koneksi ke database tidak gagal saat startup.
     depends_on:
       - item-db
+    # Restart policy
+    # Container selalu di-restart otomatis jika terhenti karena alasan apapun (crash, error, dsb.).
+    # Kecuali jika dihentikan secara manual (docker compose stop/down).
     restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # Service: item-db
+  # Menjalankan MongoDB versi 3 sebagai database untuk menyimpan item.
+  # ---------------------------------------------------------------------------
   item-db:
+    # Gunakan image resmi MongoDB versi 3 dari Docker Hub.
     image: mongo:3
+    # Mount named volume "app-db" ke direktori /data/db di dalam container.
+    # /data/db adalah lokasi default penyimpanan data MongoDB.
+    # Dengan named volume, data tetap persisten meski container di-recreate.
     volumes:
       - app-db:/data/db
+    # Restart policy
+    # Container selalu di-restart otomatis jika terhenti karena alasan apapun (crash, error, dsb.).
+    # Kecuali jika dihentikan secara manual (docker compose stop/down).
     restart: unless-stopped
 
+# =============================================================================
+# Volumes
+# Named volume "app-db" dikelola oleh Docker dan bersifat persisten.
+# Data MongoDB tidak akan hilang meskipun container item-db dihapus dan dibuat ulang.
+# =============================================================================
 volumes:
   app-db:
