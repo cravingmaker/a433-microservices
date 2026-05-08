@@ -1,0 +1,1 @@
+ghcr.io/cravingmaker/item-app:v1

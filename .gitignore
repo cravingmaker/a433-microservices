@@ -1,0 +1,5 @@
+# Local-only annotated documentation — tidak ikut push ke remote
+_docs/
+
+# Dependencies
+node_modules/
