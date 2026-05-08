@@ -1,0 +1,5 @@
+.git
+.gitignore
+README.md
+*.md
+build_push_image_karsajobs.sh
