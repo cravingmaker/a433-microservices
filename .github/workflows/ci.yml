@@ -1,0 +1,46 @@
+# Nama workflow yang tampil di tab Actions GitHub
+name: CI/CD Order Service
+
+# Jalankan CI saat push atau pull request ke branch order-service
+on:
+  push:
+    branches: [order-service, main]
+  pull_request:
+    branches: [order-service, main]
+
+# Izin eksplisit agar GITHUB_TOKEN bisa push image ke GHCR
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # Job 1: Lint Dockerfile menggunakan hadolint
+  lint-dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Lint Dockerfile — pastikan mengikuti best practice
+      - name: Lint Dockerfile dengan hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+  # Job 2: Build dan push image ke GHCR (hanya jika lint berhasil)
+  build-app-order-service:
+    needs: [lint-dockerfile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Login ke GitHub Container Registry menggunakan GITHUB_TOKEN otomatis
+      - name: Login ke GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      # Build image dan beri tag sesuai format GHCR
+      - name: Build Docker image
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/order-service:latest .
+
+      # Push image ke GHCR agar dapat ditarik oleh Kubernetes
+      - name: Push image ke GHCR
+        run: docker push ghcr.io/${{ github.repository_owner }}/order-service:latest
